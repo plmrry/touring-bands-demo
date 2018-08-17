@@ -1,0 +1,1 @@
+These are scripts used to scrape artists, gigographies, and polylines
