@@ -1,3 +1,6 @@
+import toursPath from "./output/tours-with-polylines.ndjson";
+import mapData from "./map/us.json";
+
 d3.select("body")
   .append("div")
   .append("button")
@@ -13,12 +16,12 @@ d3.select("body")
   .text("Play in Order")
   .on("click", playInOrder);
 
-const loading = d3.select("body")
+const loading = d3
+  .select("body")
   .append("h2")
-  .text("Loading...")
+  .text("Loading...");
 
 function playInOrder() {
-
   d3.selectAll(".tour-path path").attr("stroke-dasharray", function(d) {
     return `0,${this._length}`;
   });
@@ -82,8 +85,7 @@ let buffer = "";
 
 console.log("start");
 
-d3.text("output/tours-with-polylines.ndjson", data => {
-  
+d3.text(toursPath, data => {
   const rows = data.split("\n");
 
   const tours = rows
@@ -100,23 +102,26 @@ d3.text("output/tours-with-polylines.ndjson", data => {
 
   console.log("tours", tours.length);
 
-  d3.json("map/us.json", data => {
-    console.log("map");
-    data = {
-      type: "FeatureCollection",
-      features: data.features.filter(
-        f => exclude.indexOf(f.properties.NAME) === -1
-      )
-    };
-    const projection = d3
-      .geoConicConformal()
-      .parallels([33, 45])
-      .rotate([96, -39])
-      .fitSize([width, height], data);
-    var path = d3.geoPath().projection(projection);
-    loading.remove()
-    render(tours, data.features, path, projection);
-  });
+  console.log("map");
+
+  const feature = {
+    type: "FeatureCollection",
+    features: mapData.features.filter(
+      f => exclude.indexOf(f.properties.NAME) === -1
+    )
+  };
+
+  const projection = d3
+    .geoConicConformal()
+    .parallels([33, 45])
+    .rotate([96, -39])
+    .fitSize([width, height], feature);
+
+  var path = d3.geoPath().projection(projection);
+
+  loading.remove();
+  render(tours, feature.features, path, projection);
+
 });
 
 function render(tours, features, path, projection) {
